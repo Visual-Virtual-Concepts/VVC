@@ -1,23 +1,354 @@
 <!DOCTYPE html>
-  <html lang="en>
-  <head>
+<html lang="en">
+<head>
     <meta charset="UTF-8">
-    <title>Trigger 401 Error</title>
-  </head>
-  <body>
-   <h1>Testing the HTTP 401</title>
-  <p>the Website isn't Setup yet</p>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual Virtual Concepts</title>
+    <style>
+        :root {
+            --bg-main: #0a0a0c;
+            --bg-card: #121216;
+            --accent: #00ff66;
+            --accent-dim: rgba(0, 255, 102, 0.15);
+            --text-main: #f0f0f5;
+            --text-muted: #8a8a98;
+            --border: #22222a;
+        }
 
-  <script>
-  //This will be the public endpoint for the server
-  fetch('https://httpbin.org')
-     .then(response => {
-       if (response.status === 401) {
-        console.log("Success! triggered the endpoint!" + response.status + " error.");
-   }
-})
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Courier New', Courier, monospace;
+        }
 
-  .catch(error => console.error('error", error));
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
 
-  </body>
-  </html>
+        /* --- SIDEBAR --- */
+        aside {
+            width: 260px;
+            background-color: var(--bg-card);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+        }
+
+        .logo {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+            border-bottom: 2px dashed var(--border);
+            padding-bottom: 15px;
+        }
+
+        .nav-links div {
+            padding: 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            color: var(--text-muted);
+        }
+
+        .nav-links div:hover, .nav-links .active {
+            background-color: var(--accent-dim);
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        .status-box {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            border: 1px dashed var(--border);
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .status-box span {
+            color: var(--accent);
+        }
+
+        /* --- MAIN CONTENT --- */
+        main {
+            flex-1: 1;
+            width: calc(100% - 260px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* SCRAPE CONTROLLER HEADER */
+        header {
+            background-color: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            padding: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .scraper-input {
+            flex: 1;
+            background: #1a1a22;
+            border: 1px solid var(--border);
+            padding: 12px 15px;
+            color: var(--text-main);
+            font-size: 0.9rem;
+            border-radius: 4px;
+            outline: none;
+            transition: border 0.2s;
+        }
+
+        .scraper-input:focus {
+            border-color: var(--accent);
+        }
+
+        .btn-scrape {
+            background-color: var(--accent);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: opacity 0.2s;
+        }
+
+        .btn-scrape:hover {
+            opacity: 0.9;
+        }
+
+        /* VIDEO/IMAGE FEED GRID */
+        .content-feed {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        /* MEDIA CARDS */
+        .media-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .media-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent);
+        }
+
+        .media-preview {
+            width: 100%;
+            height: 180px;
+            background-color: #1a1a22;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .media-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.75);
+            padding: 4px 8px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            border-radius: 3px;
+            letter-spacing: 1px;
+            border: 1px solid var(--border);
+        }
+
+        .badge.video { color: #ff0055; border-color: #ff0055; }
+        .badge.image { color: #00ccff; border-color: #00ccff; }
+
+        .media-info {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .media-title {
+            font-size: 0.95rem;
+            font-weight: bold;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .media-meta {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Custom Scrollbar for that terminal/cyberpunk feel */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-main);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR NAVIGATION -->
+    <aside>
+        <div>
+            <div class="logo">V_V_C //</div>
+            <nav class="nav-links">
+                <div class="active">■ ALL CONCEPTS</div>
+                <div>□ VIDEOS</div>
+                <div>□ IMAGES</div>
+                <div>□ TARGET HISTORY</div>
+            </nav>
+        </div>
+        
+        <div class="status-box">
+            CORE: <span>ONLINE</span><br>
+            SCRAPER: <span id="scrape-status">IDLE</span>
+        </div>
+    </aside>
+
+    <!-- MAIN PLATFORM INTERFACE -->
+    <main>
+        <!-- SCRAPER CONTROLLER -->
+        <header>
+            <input type="url" id="target-url" class="scraper-input" placeholder="PASTE TARGET URL TO EXTRACT MEDIA... (e.g., https://example.com)" required>
+            <button class="btn-scrape" onclick="simulateScrape()">Analyze Target</button>
+        </header>
+
+        <!-- STREAMING GRID FEED -->
+        <section class="content-feed" id="feed-container">
+            <!-- Default mock content on load -->
+            <div class="media-card">
+                <div class="media-preview">
+                    <span class="badge video">VIDEO</span>
+                    <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=500&q=80" alt="Cyber Grid">
+                </div>
+                <div class="media-info">
+                    <div class="media-title">Infinitum_Loop_Sequence.mp4</div>
+                    <div class="media-meta">Source: initial_cache // Size: 14.2 MB</div>
+                </div>
+            </div>
+
+            <div class="media-card">
+                <div class="media-preview">
+                    <span class="badge image">IMAGE</span>
+                    <img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=500&q=80" alt="Matrix Code">
+                </div>
+                <div class="media-info">
+                    <div class="media-title">Matrix_Node_Capture.png</div>
+                    <div class="media-meta">Source: initial_cache // Size: 2.8 MB</div>
+                </div>
+            </div>
+
+            <div class="media-card">
+                <div class="media-preview">
+                    <span class="badge video">VIDEO</span>
+                    <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=500&q=80" alt="Network Mesh">
+                </div>
+                <div class="media-info">
+                    <div class="media-title">Global_Data_Grid_Stream.mov</div>
+                    <div class="media-meta">Source: initial_cache // Size: 45.1 MB</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- FRONTEND SIMULATION SCRIPT -->
+    <script>
+        function simulateScrape() {
+            const urlInput = document.getElementById('target-url').value;
+            const statusLabel = document.getElementById('scrape-status');
+            const feedContainer = document.getElementById('feed-container');
+
+            if (!urlInput) {
+                alert("Please drop a valid target URL first.");
+                return;
+            }
+
+            // UI feedback for processing
+            statusLabel.innerText = "EXTRACTING...";
+            statusLabel.style.color = "#ff9900";
+            
+            // Clean host name for aesthetic metadata
+            let domain = "unknown_origin";
+            try { domain = new URL(urlInput).hostname; } catch(e) {}
+
+            setTimeout(() => {
+                // Generate simulated scraped cards
+                const mockAssets = [
+                    { type: 'VIDEO', name: 'Extracted_Stream_01.mp4', size: '18.4 MB', img: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=500&q=80' },
+                    { type: 'IMAGE', name: 'Asset_Frame_Alpha.jpg', size: '1.1 MB', img: 'https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?auto=format&fit=crop&w=500&q=80' },
+                    { type: 'IMAGE', name: 'Vector_Texture_Mask.png', size: '4.7 MB', img: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=500&q=80' },
+                    { type: 'VIDEO', name: 'Raw_Capture_B_Roll.mkv', size: '112.0 MB', img: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=500&q=80' }
+                ];
+
+                // Prepend new results to the video feed grid
+                mockAssets.forEach(asset => {
+                    const card = document.createElement('div');
+                    card.className = 'media-card';
+                    card.innerHTML = `
+                        <div class="media-preview">
+                            <span class="badge ${asset.type.toLowerCase()}">${asset.type}</span>
+                            <img src="${asset.img}" alt="Scraped Content">
+                        </div>
+                        <div class="media-info">
+                            <div class="media-title">${asset.name}</div>
+                            <div class="media-meta">Source: ${domain} // Size: ${asset.size}</div>
+                        </div>
+                    `;
+                    feedContainer.insertBefore(card, feedContainer.firstChild);
+                });
+
+                // Reset Status Indicator
+                statusLabel.innerText = "SUCCESS";
+                statusLabel.style.color = "#00ff66";
+                document.getElementById('target-url').value = "";
+                
+                setTimeout(() => {
+                    statusLabel.innerText = "IDLE";
+                    statusLabel.style.color = "#00ff66";
+                }, 3000);
+
+            }, 1500); // 1.5-second simulation loop delay
+        }
+    </script>
+</body>
+</html>
