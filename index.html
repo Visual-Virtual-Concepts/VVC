@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+  <html lang="en>
+  <head>
+    <meta charset="UTF-8">
+    <title>Trigger 401 Error</title>
+  </head>
+  <body>
+   <h1>Testing the HTTP 401</title>
+  <p>the Website isn't Setup yet</p>
+
+  <script>
+  //This will be the public endpoint for the server
+  fetch('https://httpbin.org')
+     .then(response => {
+       if (response.status === 401) {
+        console.log("Success! triggered the endpoint!" + response.status + " error.");
+   }
+})
+
+  .catch(error => console.error('error", error));
+
+  </body>
+  </html>
